@@ -175,12 +175,15 @@ def parse_remote(remote: str) -> Tuple[str, str]:
         if len(parts) < 2:
             raise RuntimeError(f"Unable to parse remote '{remote}'")
         user, repo = parts[-2], parts[-1].replace(".git", "")
+        # 如果是 https://github.com/apache/tvm.git 那么 user: apache -> repo: tvm
+
     else:
         # Parse SSH remote
         m = re.search(r":(.*)/(.*)\.git", remote)
         if m is None or len(m.groups()) != 2:
             raise RuntimeError(f"Unable to parse remote '{remote}'")
         user, repo = m.groups()
+        # 如果是 git@github.com:apache/tvm.git 那么 user: apache -> repo: tvm
 
     user = os.getenv("DEBUG_USER", user)
     repo = os.getenv("DEBUG_REPO", repo)
@@ -190,8 +193,8 @@ def parse_remote(remote: str) -> Tuple[str, str]:
 def git(command, **kwargs):
     command = ["git"] + command
     logging.info(f"Running {command}")
-    proc = subprocess.run(command, stdout=subprocess.PIPE, encoding="utf-8", **kwargs)
-    if proc.returncode != 0:
+    proc = subprocess.run(command, stdout=subprocess.PIPE, encoding="utf-8", **kwargs)  # 这里把可变参数kwargs传入进去当成command参数了
+    if proc.returncode != 0:  # 执行 command 命令 失败，执行成功会返回0
         raise RuntimeError(f"Command failed {command}:\nstdout:\n{proc.stdout}")
     return proc.stdout.strip()
 

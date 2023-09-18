@@ -2,12 +2,12 @@
 name: Ping Reviewers
 on:
   schedule:
-    - cron: "0/15 * * * *"
-  workflow_dispatch:
+    - cron: "0/15 * * * *" # 15秒触发
+  workflow_dispatch:       # 开启手动执行
 
 concurrency:
-  group: ping
-  cancel-in-progress: true
+  group: ping              #  使用 concurrency 以确保只有使用相同并发组的单一作业或工作流才会同时运行
+  cancel-in-progress: true # 如果cancel-in-progress被省略或设置为false，当一个新的工作流被触发时，当前运行的工作流不会被取消，新的工作流将排队等待直到前一个工作流完成
 
 jobs:
   ping:
@@ -18,6 +18,6 @@ jobs:
       - name: Ping reviewers
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -eux
+        run: | 
+          set -eux         # 以调试的方式运行 shell, 只识别定义过的变量，同时脚本传回值非0直接结束 shell
           python ci/scripts/github/ping_reviewers.py --wait-time-minutes 10080 || echo failed

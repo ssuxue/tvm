@@ -67,11 +67,14 @@ if __name__ == "__main__":
 
     pr = json.loads(os.environ["PR"])
 
+    # PR 序号
     number = pr["number"]
+    # comment 内容 图片也能带上
     body = pr["body"]
     if body is None:
         body = ""
 
+    # 根据提交的 comment 内容查找是否有@或者cc哪些 reviewers
     new_reviewers = find_reviewers(body)
     print("Found these reviewers:", new_reviewers)
 
@@ -80,18 +83,22 @@ if __name__ == "__main__":
     else:
         github = GitHubRepo(token=os.environ["GITHUB_TOKEN"], user=user, repo=repo)
         existing_reviews = github.get(f"pulls/{number}/reviews")
+        # 获取当前 pr 号存在的 pull request 的信息
 
     existing_review_users = [review["user"]["login"] for review in existing_reviews]
     print("PR has reviews from these users:", existing_review_users)
     existing_review_users = set(r.lower() for r in existing_review_users)
 
+    # 已经被这么多 reviewers 请求过了了
     existing_reviewers = [review["login"] for review in pr["requested_reviewers"]]
     print("PR already had these reviewers requested:", existing_reviewers)
 
+    # 转成小写，可能时为了方便排除同一个人大但是由于大小写重复的问题？ reviewers 去重。
     existing_reviewers_lower = {
         existing_reviewer.lower() for existing_reviewer in existing_reviewers
     }
     to_add = []
+    # 判断哪个部分是不是已经被审查过了，审查过了就跳过，没审查过组成一个新的列表
     for new_reviewer in new_reviewers:
         if (
             new_reviewer.lower() in existing_reviewers_lower

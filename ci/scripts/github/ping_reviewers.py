@@ -27,9 +27,10 @@ from typing import List
 
 # Hackery to enable importing of utils from ci/scripts/jenkins
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-sys.path.append(str(REPO_ROOT / "ci" / "scripts" / "jenkins"))
+# __file__代表的试 settings.py 文件，Path(__file__).resolve() 是绝对路径，parent 取其父目录
+sys.path.append(str(REPO_ROOT / "ci" / "scripts" / "jenkins"))  # 导入的包除了会搜索当前目录、已安装的内置模块和第三方模块外，还会在添加到 sys 模块的 path 中搜索
 
-from git_utils import git, parse_remote
+from git_utils import git, parse_remote, GitHubRepo
 
 GIT_DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -178,11 +179,11 @@ def make_ping_message(pr, reviewers):
     reviewers = [f"@{r}" for r in reviewers]
     author = f'@{pr["author"]["login"]}'
     text = (
-        "It has been a while since this PR was updated, "
-        + " ".join(reviewers)
-        + " please leave a review or address the outstanding comments. "
-        + f"{author} if this PR is still a work in progress, please [convert it to a draft](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request#converting-a-pull-request-to-a-draft)"
-        " until it is ready for review."
+            "It has been a while since this PR was updated, "
+            + " ".join(reviewers)
+            + " please leave a review or address the outstanding comments. "
+            + f"{author} if this PR is still a work in progress, please [convert it to a draft](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request#converting-a-pull-request-to-a-draft)"
+              " until it is ready for review."
     )
     return text
 
@@ -198,6 +199,7 @@ if __name__ == "__main__":
     parser.add_argument("--now", help="(testing) custom string for current time")
     args = parser.parse_args()
 
+    #  查看本地对应的远程 url -> 相当于 git remote -v
     remote = git(["config", "--get", f"remote.{args.remote}.url"])
     user, repo = parse_remote(remote)
 
@@ -225,6 +227,8 @@ if __name__ == "__main__":
     # Loop until all PRs have been checked
     while True:
         prs = r["data"]["repository"]["pullRequests"]["nodes"]
+
+        github = GitHubRepo(token=os.environ["GITHUB_TOKEN"], user=user, repo=repo)
 
         # Don't look at draft PRs at all
         prs_to_check = []
