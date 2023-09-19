@@ -23,8 +23,12 @@ mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 cp ../cmake/config.cmake .
 
+""" 需要的选项加上 """
+# 关掉这个可以解决掉 make 时的某个 warning
 echo set\(USE_LIBBACKTRACE OFF\) >> config.cmake
+# 使用contrib sort
 echo set\(USE_SORT ON\) >> config.cmake
+# 编译时自动找到 CUDA
 echo set\(USE_CUDA OFF\) >> config.cmake
 echo set\(BUILD_STATIC_RUNTIME ON\) >> config.cmake
 echo set\(USE_FALLBACK_STL_MAP ON\) >> config.cmake

@@ -537,6 +537,7 @@ def micro_cpp_unittest(image) {
   )
 }
 
+// 开始的地方
 cancel_previous_build()
 
 try {
