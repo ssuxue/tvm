@@ -62,6 +62,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # 查看提交 PR 的信息
     remote = git(["config", "--get", f"remote.{args.remote}.url"])
     user, repo = parse_remote(remote)
 
@@ -83,22 +84,24 @@ if __name__ == "__main__":
     else:
         github = GitHubRepo(token=os.environ["GITHUB_TOKEN"], user=user, repo=repo)
         existing_reviews = github.get(f"pulls/{number}/reviews")
-        # 获取当前 pr 号存在的 pull request 的信息
+        # List reviews for a pull request
 
+    # PR 请求的审查人员中是否已经有人评论(审查)过该 PR 了
     existing_review_users = [review["user"]["login"] for review in existing_reviews]
     print("PR has reviews from these users:", existing_review_users)
     existing_review_users = set(r.lower() for r in existing_review_users)
 
-    # 已经被这么多 reviewers 请求过了了
+    # 请求审查的人中是审查员的人  -> 判断请求的人是否是可以审查的人员 -> 获取到其中审查员列表
     existing_reviewers = [review["login"] for review in pr["requested_reviewers"]]
     print("PR already had these reviewers requested:", existing_reviewers)
 
-    # 转成小写，可能时为了方便排除同一个人大但是由于大小写重复的问题？ reviewers 去重。
+    # 转成小写，可能时为了方便排除同一个人大但是由于大小写重复的问题？ reviewers 去重 -> 确定是审查人员的人的全小写姓名
     existing_reviewers_lower = {
         existing_reviewer.lower() for existing_reviewer in existing_reviewers
     }
     to_add = []
     # 判断哪个部分是不是已经被审查过了，审查过了就跳过，没审查过组成一个新的列表
+    # 判断请求审查的人员中是否有审查人员 或者 是否有请求审查的人不是审查人员但是该人员已经审查过了 然后就跳过
     for new_reviewer in new_reviewers:
         if (
             new_reviewer.lower() in existing_reviewers_lower
@@ -117,6 +120,8 @@ if __name__ == "__main__":
         # requested reviewers aren't members / contributors
         for reviewer in to_add:
             try:
+                # TODO
+                # 增加审查人员 -> 请求该审查人员进行审查并给予通知 (只能添加 Team 的人员进行审查)
                 github.post(f"pulls/{number}/requested_reviewers", {"reviewers": [reviewer]})
             except KeyboardInterrupt:
                 sys.exit()
