@@ -120,6 +120,7 @@ if __name__ == "__main__":
         # requested reviewers aren't members / contributors
         for reviewer in to_add:
             try:
+                # TODO
                 # 增加审查人员 -> 请求该审查人员进行审查并给予通知 (只能添加 Team 的人员进行审查)
                 github.post(f"pulls/{number}/requested_reviewers", {"reviewers": [reviewer]})
             except KeyboardInterrupt:
