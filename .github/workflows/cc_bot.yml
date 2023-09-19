@@ -26,9 +26,9 @@ on:
   pull_request_target:
     types: [assigned, opened, synchronize, reopened, edited, ready_for_review]
 
-concurrency:
-  group: PR-${{ github.event.pull_request.number }}  # 同一个 Commit ID 为 group
-  cancel-in-progress: true
+# concurrency:
+#   group: PR-${{ github.event.pull_request.number }}  # 同一个 Commit ID 为 group
+#   cancel-in-progress: true
 
 jobs:
   cc-reviewers:
