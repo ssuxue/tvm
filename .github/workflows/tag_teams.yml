@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   tag-teams:
-    if: github.repository == 'apache/tvm'
+    # if: github.repository == 'apache/tvm'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -38,4 +38,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -eux
-          python ci/scripts/github/github_tag_teams.py || echo failed
+          # python ci/scripts/github/github_tag_teams.py || echo failed
