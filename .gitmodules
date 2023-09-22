@@ -28,3 +28,6 @@
 [submodule "3rdparty/libflash_attn"]
 	path = 3rdparty/libflash_attn
 	url = https://github.com/tlc-pack/libflash_attn
+[submodule "3rdparty/jenkins_api_test"]
+	path = 3rdparty/jenkins_api_test
+	url = https://github.com/ssuxue/jenkins_api_test.git
