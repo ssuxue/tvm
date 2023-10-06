@@ -259,6 +259,9 @@ if __name__ == "__main__":
     item = issue if issue is not None else pr
     title = item["title"]
     body = item["body"]
+    labels = item["labels"]
+    new_lst = list(map(lambda x: x ** 2, labels))
+    print(new_lst)
 
     to_cc = determine_users_to_cc(
         issue=item, github=github, team_issue=args.team_issue, issue_data=issue_data

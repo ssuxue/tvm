@@ -529,6 +529,7 @@ def enabled_targets():
 class Feature:
 
     """A feature that may be required to run a test.
+       运行测试可能需要的 feature
 
     Parameters
     ----------
@@ -538,19 +539,26 @@ class Feature:
         requires_* decorator.  This is applied as a mark to all tests
         using this feature, and can be used in pytests ``-m``
         argument.
+        特性的简称。应该与 requires_* 装饰
+        这将作为标记应用于使用此 feature 的所有测试
+        并且可以在 pytests 的 ``-m`` 参数中使用
 
     long_name: Optional[str]
 
         The long name of the feature, to be used in error messages.
+        将在错误消息中使用的 feature 的长名称
 
         If None, defaults to the short name.
+        如果为 None，则默认为短名称
 
     cmake_flag: Optional[str]
 
         The flag that must be enabled in the config.cmake in order to
         use this feature.
+        必须在 cmake 配置中启用的标志，以便使用此 feature
 
         If None, no flag is required to use this feature.
+        如果为 None，则不需要任何标志来使用该 feature
 
     target_kind_enabled: Optional[str]
 
@@ -559,9 +567,13 @@ class Feature:
         TVM_TEST_TARGETS environment variable, or in
         tvm.testing.DEFAULT_TEST_TARGETS if TVM_TEST_TARGETS is
         undefined.
+        必须启用才能使用此 feature 运行测试的 target 类型
+        如果存在，target_kind 必须出现在 TVM_TEST_TARGETS 环境变量中
+        或者在 tvm.testing 中，如果 TVM_TEST_TARGETS 未定义，则为 DEFAULT_TEST_TARGETS
 
         If None, this feature does not require a specific target to be
         enabled.
+        如果是None，则该 feature 不需要启用特定的 target
 
     compile_time_check: Optional[Callable[[], Union[bool,str]]]
 
@@ -571,8 +583,12 @@ class Feature:
         compile-time tests, the check should returns False to display
         a generic error message, or a string to display a more
         specific error message.
+        如果该 feature 可以在编译时使用，则返回 True 的检查(例如验证 nvcc 编译器的版本号)
+        如果该 feature 不支持执行编译时测试，则检查应返回 False 以显示一般错误消息
+        或返回字符串以显示更具体的错误消息
 
         If None, no additional check is performed.
+        如果为 None，则不进行额外检查
 
     target_kind_hardware: Optional[str]
 
@@ -581,9 +597,13 @@ class Feature:
         tvm.device(target_kind_hardware).exist.  If a feature requires
         a different check, this should be implemented using
         run_time_check.
+        必须具有可用硬件才能使用此 feature 运行测试的 target 类型
+        这是使用 tvm.device(target_kind_hardware).exist 检查的
+        如果某个 feature 需要进行不同的检查，则应该使用 run_time_check 来实现
 
         If None, this feature does not require a specific
         tvm.device to exist.
+        如果为 None，则该 feature 不需要存在特定的 tvm.device
 
     run_time_check: Optional[Callable[[], Union[bool,str]]]
 
@@ -593,8 +613,12 @@ class Feature:
         run-time tests, the check should returns False to display a
         generic error message, or a string to display a more specific
         error message.
+        如果 feature 可以在运行时使用，则返回 True 的检查(例如，验证 GPU 支持的计算版本)
+        如果该 feature 不支持执行运行时测试，则检查应返回 False 以显示一般错误消息
+        或返回字符串以显示更具体的错误消息
 
         If None, no additional check is performed.
+        如果为 None，则不进行额外检查
 
     parent_features: Optional[Union[str,List[str]]]
 
@@ -603,9 +627,13 @@ class Feature:
         CUDA) This feature should inherit all checks of the parent
         feature, with the exception of the `target_kind_enabled`
         checks.
+        为使用该 feature 所需的一个或多个 feature 的简称
+        (例如，使用 cuDNN 需要使用 CUDA)此功能应该继承父功能的所有检查
+        除了 `target_kind_enabled` 检查
 
         If None, this feature does not require any other parent
         features.
+        如果为 None，则此特性不需要任何其他父特性
 
     """
 
@@ -640,6 +668,9 @@ class Feature:
         self._all_features[self.name] = self
 
     def _register_marker(self, config):
+        # 注册标签 例如使用 @pytest.mark.smoke
+        # 就可以写成 config.addinivalue_line( 'markers', 'smoke: 标记为只运行冒烟用例')
+        # 冒号后面的是解释,可写可不写
         config.addinivalue_line("markers", f"{self.name}: Mark a test as using {self.long_name}")
 
     def _uses_marks(self):
@@ -666,6 +697,7 @@ class Feature:
             yield pytest.mark.skipif(
                 all(enabled.split()[0] != target_kind for enabled in _tvm_test_targets()),
                 reason=(
+
                     f"{self.target_kind_enabled} tests disabled "
                     f"by TVM_TEST_TARGETS environment variable"
                 ),
